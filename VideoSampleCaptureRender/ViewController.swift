@@ -93,7 +93,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         self.localVideoContainer!.backgroundColor = UIColor.blackColor()
         
         // Entry text field for the identity to invite to a Conversation (the invitee)
-        inviteeTextField.alpha = 0.5
+        inviteeTextField.alpha = 0.9
         inviteeTextField.hidden = true
         inviteeTextField.autocorrectionType = .No
         inviteeTextField.returnKeyType = .Send
