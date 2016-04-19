@@ -91,6 +91,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         self.localVideoContainer = UIView(frame: self.view.frame)
         self.view.addSubview(self.localVideoContainer!)
         self.localVideoContainer!.backgroundColor = UIColor.blackColor()
+        self.localVideoContainer!.hidden = true
         
         // Entry text field for the identity to invite to a Conversation (the invitee)
         inviteeTextField.alpha = 0.9
@@ -113,7 +114,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         self.disconnectButton.hidden = true
         
         // Start listening for Invites
-        TwilioConversationsClient.setLogLevel(.Error)
+        TwilioConversationsClient.setLogLevel(.Warning)
         self.listenForInvites()
     }
     
@@ -227,8 +228,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         // Preview our local camera track in the local video container
         self.localVideoContainer!.addSubview((self.camera!.previewView)!)
         self.camera!.previewView!.frame = self.localVideoContainer!.bounds
-        self.camera!.previewView!.contentMode = .ScaleAspectFit
-        self.camera!.previewView!.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
     }
     
     func destroyLocalMedia() {
@@ -339,7 +338,6 @@ extension ViewController: TWCParticipantDelegate {
         self.remoteVideoRenderer = TWCVideoViewRenderer(delegate: self)
         videoTrack.addRenderer(self.remoteVideoRenderer!)
         self.remoteVideoRenderer!.view.bounds = self.remoteVideoContainer!.frame
-        self.remoteVideoRenderer!.view.contentMode = .ScaleAspectFit
         
         self.remoteVideoContainer!.addSubview(self.remoteVideoRenderer!.view)
         
@@ -363,6 +361,10 @@ extension ViewController: TWCLocalMediaDelegate {
 
 // MARK: TWCCameraCapturerDelegate
 extension ViewController : TWCCameraCapturerDelegate {
+    func cameraCapturerPreviewDidStart(capturer: TWCCameraCapturer) {
+        self.localVideoContainer!.hidden = false
+    }
+    
     func cameraCapturer(capturer: TWCCameraCapturer, didStartWithSource source: TWCVideoCaptureSource) {
         self.statusMessage.hidden = true
     }
