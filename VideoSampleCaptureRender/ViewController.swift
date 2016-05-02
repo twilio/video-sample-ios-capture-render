@@ -219,7 +219,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         960x540 video will fill modern iPhone screens. However, older devices (< iPhone 5s, iPad Air 2) will have trouble rendering this quality. */
         
-        return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize960x540, minSize: TWCVideoConstraintsSize960x540, maxFrameRate: 0, minFrameRate: 0)
+        if (Platform.isLowPerformanceDevice) {
+            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize640x480, minSize: TWCVideoConstraintsSize640x480, maxFrameRate: 0, minFrameRate: 0)
+        } else {
+            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize960x540, minSize: TWCVideoConstraintsSize960x540, maxFrameRate: 0, minFrameRate: 0)
+        }
     }
     
     func setupLocalPreview() {
@@ -278,13 +282,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
 extension ViewController: TwilioConversationsClientDelegate {
     func conversationsClient(conversationsClient: TwilioConversationsClient,
         didFailToStartListeningWithError error: NSError) {
+        
+        // Do not interrupt the on going conversation UI. Client status will
+        // changed to .FailedToListen when conversation ends.
+        if (conversation == nil) {
             self.updateClientStatus(.FailedToListen, animated: false)
+        }
     }
     
     func conversationsClientDidStartListeningForInvites(conversationsClient: TwilioConversationsClient) {
         // Successfully listening for Invites
         self.setupLocalMedia()
-        self.updateClientStatus(.Listening, animated: true)
+        
+        // Do not interrupt the on going conversation UI. Client status will
+        // changed to .Listening when conversation ends.
+        if (conversation == nil) {
+            self.updateClientStatus(.Listening, animated: true)
+        }
     }
     
     // Automatically accept any incoming Invite
@@ -327,7 +341,12 @@ extension ViewController: TWCConversationDelegate {
         
         // Create a new instance of LocalMedia and use it when returning to the listening (preview) state
         self.setupLocalMedia()
-        self.updateClientStatus(.Listening, animated: true)
+        
+        if (self.client!.listening) {
+            self.updateClientStatus(.Listening, animated: true)
+        } else {
+            self.updateClientStatus(.FailedToListen, animated: true)
+        }
     }
 }
 
