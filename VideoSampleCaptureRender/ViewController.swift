@@ -57,18 +57,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
             self.statusMessage.hidden = false
             self.statusMessage.text = "Failure while attempting to listen for Conversation Invites."
             self.view.bringSubviewToFront(self.statusMessage)
+            self.localVideoContainer?.hidden = true
         case .Listening:
             spinner.stopAnimating()
             self.disconnectButton.hidden = true
             self.inviteeTextField.hidden = false
+            self.localVideoContainer?.hidden = false
+            self.statusMessage.hidden = true
         case .Connecting:
             self.spinner.startAnimating()
             self.inviteeTextField.hidden = true
+            self.localVideoContainer?.hidden = false
         case .Connected:
             self.spinner.stopAnimating()
             self.inviteeTextField.hidden = true
             self.view.endEditing(true)
             self.disconnectButton.hidden = false
+            self.localVideoContainer?.hidden = false
         }
         // Update UI Layout, optionally animated
         self.view.setNeedsLayout()
@@ -112,6 +117,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
         // Disconnect button
         self.view.bringSubviewToFront(self.disconnectButton)
         self.disconnectButton.hidden = true
+        
+        // Setup the local media
+        self.setupLocalMedia()
         
         // Start listening for Invites
         TwilioConversationsClient.setLogLevel(.Warning)
@@ -215,12 +223,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     func videoCaptureConstraints () -> TWCVideoConstraints {
         /* Video constraints provide a mechanism to capture a video track using a preferred frame size and/or frame rate.
         
-        Here, we set the captured frame size to 960x540. Check TWCCameraCapturer.h for other valid video constraints values.
-        
-        960x540 video will fill modern iPhone screens. However, older devices (< iPhone 5s, iPad Air 2) will have trouble rendering this quality. */
+         Here, we set the captured frame size to 960x540. Check TWCCameraCapturer.h for other valid video constraints values. 
+         
+         960x540 video will fill modern iPhone screens. However, older devices (< iPhone 5s, iPad Air 2) will have trouble rendering 960x540 quality. So, we set captured frame size to 480x360 and frame rate to 15 for older devices. */
         
         if (Platform.isLowPerformanceDevice) {
-            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize640x480, minSize: TWCVideoConstraintsSize640x480, maxFrameRate: 0, minFrameRate: 0)
+            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize480x360, minSize: TWCVideoConstraintsSize480x360, maxFrameRate: 15, minFrameRate: 15)
         } else {
             return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize960x540, minSize: TWCVideoConstraintsSize960x540, maxFrameRate: 0, minFrameRate: 0)
         }
@@ -238,6 +246,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
         self.camera?.previewView?.removeFromSuperview()
         self.camera = nil
         self.localMedia = nil
+    }
+    
+    func resetClientStatus() {
+        // Reset the local media
+        destroyLocalMedia()
+        setupLocalMedia()
+        
+        // Reset the client ui status
+        updateClientStatus(self.client!.listening ? .Listening : .FailedToListen, animated: true)
     }
     
     // Respond to "Send" button on keyboard
@@ -269,11 +286,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
             alertController.addAction(OKAction)
             self.presentViewController(alertController, animated: true) { }
             
-            self.destroyLocalMedia()
-            self.setupLocalMedia()
-            
-            // Return to listening state
-            self.updateClientStatus(.Listening, animated: false)
+            // Destroy the old local media and set up new local media.
+            self.resetClientStatus()
         }
     }
 }
@@ -292,12 +306,19 @@ extension ViewController: TwilioConversationsClientDelegate {
     
     func conversationsClientDidStartListeningForInvites(conversationsClient: TwilioConversationsClient) {
         // Successfully listening for Invites
-        self.setupLocalMedia()
-        
+
         // Do not interrupt the on going conversation UI. Client status will
         // changed to .Listening when conversation ends.
         if (conversation == nil) {
             self.updateClientStatus(.Listening, animated: true)
+        }
+    }
+    
+    func conversationsClientDidStopListeningForInvites(conversationsClient: TwilioConversationsClient, error: NSError?) {
+        // Do not interrupt the on going conversation UI. Client status will
+        // changed to .Listening when conversation ends.
+        if (conversation == nil) {
+            self.updateClientStatus(.FailedToListen, animated: true)
         }
     }
     
@@ -314,8 +335,9 @@ extension ViewController: TwilioConversationsClientDelegate {
                         conversation!.delegate = self
                     } else {
                         print("Error: Unable to connect to accepted Conversation")
-                        // Return to listening state
-                        self.updateClientStatus(.Listening, animated: false)
+                        
+                        // Return to listening state is conversations client is still listening
+                        self.updateClientStatus(self.client!.listening ? .Listening : .FailedToListen, animated: true)
                     }
                 })
             }
@@ -337,16 +359,7 @@ extension ViewController: TWCConversationDelegate {
     
     func conversationEnded(conversation: TWCConversation) {
         self.conversation = nil
-        self.destroyLocalMedia()
-        
-        // Create a new instance of LocalMedia and use it when returning to the listening (preview) state
-        self.setupLocalMedia()
-        
-        if (self.client!.listening) {
-            self.updateClientStatus(.Listening, animated: true)
-        } else {
-            self.updateClientStatus(.FailedToListen, animated: true)
-        }
+        self.resetClientStatus()
     }
 }
 
@@ -381,7 +394,9 @@ extension ViewController: TWCLocalMediaDelegate {
 // MARK: TWCCameraCapturerDelegate
 extension ViewController : TWCCameraCapturerDelegate {
     func cameraCapturerPreviewDidStart(capturer: TWCCameraCapturer) {
-        self.localVideoContainer!.hidden = false
+        if (self.client!.listening) {
+            self.localVideoContainer!.hidden = false
+        }
     }
     
     func cameraCapturer(capturer: TWCCameraCapturer, didStartWithSource source: TWCVideoCaptureSource) {
