@@ -4,7 +4,7 @@ Twilio Video - iOS Sample - Advanced Capturing and Rendering
 This project is a sample application using [Twilio Video for iOS](https://www.twilio.com/docs/api/video). It aims to demonstrate more advanced video capturing and rendering techniques than the [Quickstart application](https://www.twilio.com/docs/api/video/guide/quickstart-ios).
 
 ### Requirements
-This application was most recently updated to run against [version 0.22.0](https://www.twilio.com/docs/api/video/changelogs/ios) of the Twilio Video iOS SDK. 
+This application was most recently updated to run against [version 0.24.1](https://www.twilio.com/docs/api/video/changelogs/ios) of the Twilio Video iOS SDK. 
 
 ### How to Run
 
