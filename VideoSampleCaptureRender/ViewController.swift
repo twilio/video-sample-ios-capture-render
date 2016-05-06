@@ -225,7 +225,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
          Here, we set the captured frame size to 960x540. Check TWCCameraCapturer.h for other valid video constraints values. 
          
-         960x540 video will fill modern iPhone screens. However, older devices (< iPhone 5s, iPad Air 2) will have trouble rendering 960x540 quality. So, we set captured frame size to 480x360 and frame rate to 15 for older devices. */
+         960x540 video will fill modern iPhone screens. However, older 32-bit devices (A5, A6 based) will have trouble capturing, and encoding video at HD quality. For these devices we constrain the capturer to produce 480x360 video at 15fps. */
         
         if (Platform.isLowPerformanceDevice) {
             return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize480x360, minSize: TWCVideoConstraintsSize480x360, maxFrameRate: 15, minFrameRate: 15)
