@@ -336,8 +336,8 @@ extension ViewController: TwilioConversationsClientDelegate {
                     } else {
                         print("Error: Unable to connect to accepted Conversation")
                         
-                        // Return to listening state is conversations client is still listening
-                        self.updateClientStatus(self.client!.listening ? .Listening : .FailedToListen, animated: true)
+                        // Destroy the old local media and set up new local media.
+                        self.resetClientStatus()
                     }
                 })
             }
