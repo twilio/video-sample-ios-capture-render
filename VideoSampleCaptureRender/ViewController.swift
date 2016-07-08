@@ -8,6 +8,9 @@
 
 import UIKit
 
+import TwilioConversationsClient
+import TwilioCommon.TwilioAccessManager
+
 class ViewController: UIViewController, UITextFieldDelegate {
     
     // Twilio Access Token - Generate a demo Access Token at https://www.twilio.com/user/account/video/dev-tools/testing-tools
@@ -228,9 +231,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
          960x540 video will fill modern iPhone screens. However, older 32-bit devices (A5, A6 based) will have trouble capturing, and encoding video at HD quality. For these devices we constrain the capturer to produce 480x360 video at 15fps. */
         
         if (Platform.isLowPerformanceDevice) {
-            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize480x360, minSize: TWCVideoConstraintsSize480x360, maxFrameRate: 15, minFrameRate: 15)
+            return TWCVideoConstraints.init(block: { (constraints) in
+                constraints.maxSize = TWCVideoConstraintsSize480x360
+                constraints.minSize = TWCVideoConstraintsSize480x360
+                constraints.maxFrameRate = 15
+                constraints.minFrameRate = 15
+            })
         } else {
-            return TWCVideoConstraints(maxSize: TWCVideoConstraintsSize960x540, minSize: TWCVideoConstraintsSize960x540, maxFrameRate: 0, minFrameRate: 0)
+            return TWCVideoConstraints.init(block: { (constraints) in
+                constraints.maxSize = TWCVideoConstraintsSize960x540
+                constraints.minSize = TWCVideoConstraintsSize960x540
+                constraints.maxFrameRate = TWCVideoFrameRateConstraintsNone
+                constraints.minFrameRate = TWCVideoFrameRateConstraintsNone
+            })
         }
     }
     
