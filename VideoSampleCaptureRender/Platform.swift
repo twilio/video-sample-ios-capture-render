@@ -3,7 +3,7 @@
 //  VideoSampleCaptureRender
 //
 //  Created by Piyush Tank on 3/14/16.
-//  Copyright © 2016-2017 Twilio. All rights reserved.
+//  Copyright © 2016-2017 Twilio, Inc. All rights reserved.
 //
 
 import Foundation

@@ -153,7 +153,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0720;
-				ORGANIZATIONNAME = Twilio;
+				ORGANIZATIONNAME = "Twilio, Inc.";
 				TargetAttributes = {
 					4BEF62431C9213D700A674ED = {
 						CreatedOnToolsVersion = 7.2;
