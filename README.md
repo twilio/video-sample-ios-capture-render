@@ -1,10 +1,12 @@
 Twilio Video - iOS Sample - Advanced Capturing and Rendering
 ==============================================================
 
+> NOTE: This sample application uses Twilio's deprecated Programmable Video Conversations API. We plan on updating this app for Swift 3.x and the Rooms API, at which point we will be merging it into the [video-ios-quickstart-swift](https://github.com/twilio/video-quickstart-swift) repo.
+
 This project is a sample application using [Twilio Video for iOS](https://www.twilio.com/docs/api/video). It aims to demonstrate more advanced video capturing and rendering techniques than the [Quickstart application](https://www.twilio.com/docs/api/video/guide/quickstart-ios).
 
 ### Requirements
-This application was most recently updated to run against [version 0.24.1](https://www.twilio.com/docs/api/video/changelogs/ios) of the Twilio Video iOS SDK. 
+This application was most recently updated to run against [version 0.25.0](https://www.twilio.com/docs/api/video/changelogs/ios) of the Twilio Video iOS SDK. 
 
 ### How to Run
 
